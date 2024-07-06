@@ -10,13 +10,13 @@ try:
     )
 
     cursor = connection.cursor()
-    cursor.execute("SELECT image_data FROM webdata.storing WHERE image_name = 'C:\Users\chali\Downloads\sign.jpg'")  # Added quotes around image name
+    cursor.execute("SELECT image_data FROM webdata.storing WHERE image_name = 'C:\Users\chali\Downloads\sign.jpg'")
     result = cursor.fetchone()
 
     if result:
         image_data = result[0]
 
-        with open('image.png', 'wb') as file:  # Changed file mode to 'wb'
+        with open('image.png', 'wb') as file:  
             file.write(image_data)
 
 except Error as e:

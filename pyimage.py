@@ -6,7 +6,6 @@ def insert_image(connection, cursor, image_name, image_data):
         cursor.execute("INSERT INTO images (image_name, image_data) VALUES (%s, %s)", (image_name, image_data))
         connection.commit()
         print("Image inserted successfully.")
-
     except Error as e:
         connection.rollback()
         print(f"Error inserting image: {e}")
@@ -21,20 +20,17 @@ try:
 
     cursor = connection.cursor()
 
-    
     file_path = input("Enter the file path of the image: ")
+    try:
+        with open(file_path, 'rb') as file:
+            image_data = file.read()
+    except FileNotFoundError:
+        print("Error: File not found.")
+        raise
 
-    
-    with open(file_path, 'rb') as file:
-        image_data = file.read()
-
-   
     image_name = file_path.split('/')[-1]  
 
     insert_image(connection, cursor, image_name, image_data)
-
-except FileNotFoundError:
-    print("Error: File not found.")
 
 except Error as e:
     print(f"Database connection error: {e}")
