@@ -1,7 +1,7 @@
 import streamlit as st
 import mysql.connector
 from mysql.connector import Error
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 import io
 import requests
 
@@ -21,8 +21,12 @@ def retrieve_images(connection, cursor):
         images = []
         for row in rows:
             image_name, image_data = row
-            image = Image.open(io.BytesIO(image_data))
-            images.append((image_name, image, image_data))
+            try:
+                image = Image.open(io.BytesIO(image_data))
+                images.append((image_name, image, image_data))
+            except UnidentifiedImageError:
+             #   st.error(f"Unidentified image error for image: {image_name}")
+                continue
         return images
     except Error as e:
         st.error(f"Error retrieving images: {e}")
@@ -52,7 +56,6 @@ def main():
 
         st.title("Upload and Retrieve Images from Database")
 
-        
         uploaded_file = st.file_uploader("Choose an image from your system...", type=["jpg", "jpeg", "png"])
 
         if uploaded_file is not None:
@@ -60,7 +63,6 @@ def main():
             image_name = uploaded_file.name
             insert_image(connection, cursor, image_name, image_data)
 
-        
         image_url = st.text_input("Or enter the URL of an image...")
         if st.button("Upload Image from URL"):
             if image_url:
@@ -71,9 +73,9 @@ def main():
         if st.button("Get All Images"):
             images = retrieve_images(connection, cursor)
             if images:
-                cols = st.columns(3) 
+                cols = st.columns(3)
                 for idx, (image_name, image, image_data) in enumerate(images):
-                    col = cols[idx % 3]  
+                    col = cols[idx % 3]
                     with col:
                         st.image(image, caption=image_name)
                         st.download_button(
